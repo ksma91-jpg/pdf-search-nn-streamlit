@@ -3,36 +3,21 @@ from pathlib import Path
 
 APP_NAME = "NN PDF Search"
 
+MANIFEST_PATH = Path("documents_manifest.csv")
+
 LOCAL_CACHE = Path("local_cache")
 LOCAL_DOCUMENTS = LOCAL_CACHE / "documents"
-LOCAL_INDEXES = LOCAL_CACHE / "indexes"
-LOCAL_WHOOSH = LOCAL_INDEXES / "whoosh"
-LOCAL_FAISS = LOCAL_INDEXES / "faiss"
 LOCAL_METADATA = LOCAL_CACHE / "metadata"
 LOCAL_TEMP = LOCAL_CACHE / "temp"
 
-REMOTE_BASE_FOLDER = "NN PDF Search"
-REMOTE_DOCUMENTS = "documents"
-REMOTE_INDEXES = "indexes"
-REMOTE_WHOOSH = "indexes/whoosh"
-REMOTE_FAISS = "indexes/faiss"
-REMOTE_METADATA = "metadata"
-REMOTE_CACHE = "cache"
-
 CHUNK_SIZE = 900
 CHUNK_OVERLAP = 150
-TOP_K_CLASSIC = 10
-TOP_K_SEMANTIC = 10
-TOP_K_FINAL = 8
 
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+TOP_K_FINAL = 8
 
 for path in [
     LOCAL_CACHE,
     LOCAL_DOCUMENTS,
-    LOCAL_INDEXES,
-    LOCAL_WHOOSH,
-    LOCAL_FAISS,
     LOCAL_METADATA,
     LOCAL_TEMP,
 ]:
