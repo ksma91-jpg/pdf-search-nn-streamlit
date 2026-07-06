@@ -1,0 +1,14 @@
+streamlit
+PyMuPDF
+whoosh
+pandas
+numpy
+tqdm
+faiss-cpu
+sentence-transformers
+scikit-learn
+python-dotenv
+requests
+msal
+tenacity
+Pillow

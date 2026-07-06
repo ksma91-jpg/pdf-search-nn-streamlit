@@ -1,0 +1,17 @@
+import streamlit as st
+
+st.title("📄 Documentos")
+
+st.info("Aquí cargaremos PDFs y los enviaremos a Teams / SharePoint.")
+
+uploaded_files = st.file_uploader(
+    "Sube uno o varios PDFs",
+    type=["pdf"],
+    accept_multiple_files=True,
+)
+
+if uploaded_files:
+    st.write(f"Archivos seleccionados: {len(uploaded_files)}")
+
+    for file in uploaded_files:
+        st.write(f"- {file.name}")
