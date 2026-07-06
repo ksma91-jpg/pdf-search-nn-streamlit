@@ -1,0 +1,12 @@
+import streamlit as st
+
+st.title("🔍 Búsqueda")
+
+query = st.text_input("Escribe tu búsqueda")
+
+if st.button("Buscar"):
+    if not query.strip():
+        st.warning("Escribe una consulta.")
+    else:
+        st.info("En los siguientes pasos conectaremos la búsqueda Whoosh + FAISS.")
+        st.write(f"Consulta: {query}")
