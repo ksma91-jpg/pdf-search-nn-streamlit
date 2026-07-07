@@ -4,6 +4,7 @@ from config import MANIFEST_PATH, LOCAL_DOCUMENTS
 from services.manifest_loader import load_manifest
 from services.document_downloader import download_pdf
 from services.pdf_reader import extract_pdf_pages
+from services.simple_index import build_simple_index, load_simple_index
 
 
 st.title("📄 Documentos públicos")
@@ -23,34 +24,51 @@ try:
     else:
         st.dataframe(manifest, use_container_width=True)
 
-        if st.button("Descargar y probar lectura de PDFs"):
-            total_pages = 0
+        col1, col2 = st.columns(2)
 
-            progress = st.progress(0)
-            status = st.empty()
+        with col1:
+            if st.button("Descargar y probar lectura de PDFs"):
+                total_pages = 0
 
-            for idx, row in manifest.iterrows():
-                title = row["title"]
-                url = row["url"]
+                progress = st.progress(0)
+                status = st.empty()
 
-                status.write(f"Procesando: {title}")
+                for idx, row in manifest.iterrows():
+                    title = row["title"]
+                    url = row["url"]
 
-                try:
-                    pdf_path = download_pdf(title, url, LOCAL_DOCUMENTS)
-                    pages = extract_pdf_pages(pdf_path)
-                    total_pages += len(pages)
+                    status.write(f"Procesando: {title}")
 
-                    st.success(
-                        f"OK: {title} — {len(pages)} páginas con texto"
-                    )
+                    try:
+                        pdf_path = download_pdf(title, url, LOCAL_DOCUMENTS)
+                        pages = extract_pdf_pages(pdf_path)
+                        total_pages += len(pages)
 
-                except Exception as e:
-                    st.error(f"Error procesando {title}: {e}")
+                        st.success(
+                            f"OK: {title} — {len(pages)} páginas con texto"
+                        )
 
-                progress.progress((idx + 1) / len(manifest))
+                    except Exception as e:
+                        st.error(f"Error procesando {title}: {e}")
 
-            status.write("Proceso terminado.")
-            st.info(f"Total de páginas con texto extraídas: {total_pages}")
+                    progress.progress((idx + 1) / len(manifest))
+
+                status.write("Proceso terminado.")
+                st.info(f"Total de páginas con texto extraídas: {total_pages}")
+
+        with col2:
+            if st.button("Construir índice de búsqueda"):
+                with st.spinner("Construyendo índice de búsqueda..."):
+                    records = build_simple_index()
+
+                st.success(f"Índice construido con {len(records)} fragmentos.")
+
+        existing_index = load_simple_index()
+
+        if existing_index:
+            st.info(f"Índice actual disponible: {len(existing_index)} fragmentos.")
+        else:
+            st.warning("Todavía no existe índice de búsqueda. Haz clic en Construir índice de búsqueda.")
 
 except Exception as e:
     st.error("Error leyendo el manifiesto.")
