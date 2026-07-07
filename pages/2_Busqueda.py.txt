@@ -1,12 +1,40 @@
 import streamlit as st
 
+from services.simple_index import load_simple_index, search_simple_index
+
+
 st.title("🔍 Búsqueda")
 
-query = st.text_input("Escribe tu búsqueda")
+index = load_simple_index()
+
+if not index:
+    st.warning(
+        "No existe índice de búsqueda todavía. "
+        "Ve a la página Documentos y haz clic en 'Construir índice de búsqueda'."
+    )
+else:
+    st.success(f"Índice cargado: {len(index)} fragmentos disponibles.")
+
+query = st.text_input("Escribe tu búsqueda", placeholder="Ejemplo: semaglutida, acta, medicamento, evaluación...")
+
+top_k = st.slider("Número de resultados", min_value=5, max_value=30, value=10)
 
 if st.button("Buscar"):
     if not query.strip():
         st.warning("Escribe una consulta.")
     else:
-        st.info("En los siguientes pasos conectaremos la búsqueda Whoosh + FAISS.")
-        st.write(f"Consulta: {query}")
+        results = search_simple_index(query, top_k=top_k)
+
+        if not results:
+            st.warning("No encontré resultados para esa búsqueda.")
+        else:
+            st.success(f"Encontré {len(results)} resultados.")
+
+            for i, result in enumerate(results, start=1):
+                st.markdown("---")
+                st.subheader(f"{i}. {result['title']}")
+                st.write(f"**Página:** {result['page']}")
+                st.write(f"**Score:** {result['score']}")
+                st.write(result["text"])
+
+                st.caption(result["url"])
