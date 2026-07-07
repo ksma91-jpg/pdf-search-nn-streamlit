@@ -1,17 +1,62 @@
 import streamlit as st
 
-st.title("💬 Chat basado en evidencia")
+from services.simple_index import load_simple_index, search_simple_index, build_llm_prompt
+
+
+st.title("💬 Contexto para IA interna")
 
 st.info(
-    "Como no tenemos API del LLM interno, esta sección preparará contexto "
-    "relevante para copiar y pegar en el chat corporativo aprobado."
+    "Esta sección busca evidencia en los PDFs y genera un prompt listo para copiar "
+    "en el LLM interno aprobado."
 )
 
-question = st.text_area("Pregunta")
+index = load_simple_index()
 
-if st.button("Preparar contexto"):
+if not index:
+    st.warning(
+        "No existe índice todavía. Ve a Documentos y construye el índice de búsqueda."
+    )
+else:
+    st.success(f"Índice cargado: {len(index)} fragmentos disponibles.")
+
+question = st.text_area(
+    "Pregunta",
+    placeholder="Ejemplo: ¿Qué dice el acta sobre semaglutida?",
+    height=120,
+)
+
+top_k = st.slider(
+    "Cantidad de fragmentos para contexto",
+    min_value=5,
+    max_value=20,
+    value=8,
+)
+
+if st.button("Preparar contexto para IA"):
     if not question.strip():
         st.warning("Escribe una pregunta.")
     else:
-        st.info("En los siguientes pasos conectaremos esta sección a la búsqueda semántica.")
-        st.write(f"Pregunta: {question}")
+        results = search_simple_index(question, top_k=top_k)
+
+        if not results:
+            st.warning("No encontré evidencia en los documentos para esa pregunta.")
+        else:
+            prompt = build_llm_prompt(question, results)
+
+            st.success("Contexto preparado.")
+
+            st.text_area(
+                "Copia este prompt y pégalo en el LLM interno aprobado",
+                value=prompt,
+                height=450,
+            )
+
+            st.subheader("Fuentes usadas")
+
+            for i, result in enumerate(results, start=1):
+                with st.expander(
+                    f"Fuente {i}: {result['title']} — página {result['page']}",
+                    expanded=i <= 3,
+                ):
+                    st.write(result["text"])
+                    st.caption(result["url"])
